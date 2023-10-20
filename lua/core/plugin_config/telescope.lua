@@ -20,18 +20,38 @@ require('telescope').setup{
         layout_config = {
             horizontal = {
                 prompt_position = 'top',
-                preview_width = 0.55,
+                preview_width = 0.45,
                 results_width = 0.8,
             },
             vertical = {
                 mirror = false,
             },
-            width = 0.87,
-            height = 0.80,
+            width = 0.92,
+            height = 0.92,
             preview_cutoff = 120,
         },
         file_sorter = require('telescope.sorters').get_fuzzy_file,
-        file_ignore_patterns = { 'node_modules', '__pycache' },
+        file_ignore_patterns = {
+            'node_modules',
+            '__pycache__',
+            '^backend/build/',
+            '^backend/sphinxsearch/',
+            '.idea',
+            '.git/',
+            '.ruff_cache',
+            '.gradle',
+            '%.java',
+            '%.jpg',
+            '%.jpeg',
+            '%.png',
+            '%.jar',
+            '%.gz',
+            '%.bz2',
+            '%.zip',
+            '%.exe',
+            '%.pdf',
+            'ktlint',
+        },
         generic_sorter = require('telescope.sorters').get_generic_fuzzy_sorter,
         path_display = { 'truncate' },
         winblend = 0,
@@ -46,12 +66,27 @@ require('telescope').setup{
         buffer_previewer_maker = require('telescope.previewers').buffer_previewer_maker,
         mappings = {
             n = { ['q'] = require('telescope.actions').close },
+            i = {
+                ["<C-R>"] = require('telescope.actions').cycle_history_prev,
+                ["<C-T>"] = require('telescope.actions').cycle_history_next,
+            },
         },
+    },
+    pickers = {
+        buffers = {
+            ignore_current_buffer = true,
+            sort_lastused = true,
+        },
+        find_files = {
+            hidden = true,
+            no_ignore = true,
+        }
     },
     extensions = {
         file_browser = {
+            collapse_dirs = true,
             grouped = true,
-            respect_gitignore = true,
+            respect_gitignore = false,
             -- disables netrw and use telescope-file-browser in its place
             hijack_netrw = true,
         },
@@ -64,16 +99,36 @@ require('telescope').setup{
     }
 }
 require('telescope').load_extension('fzf')
+require('telescope').load_extension('coc')
 require('telescope').load_extension('file_browser')
-require('telescope').load_extension('attempt')
 
 local builtin = require('telescope.builtin')
+local file_browser = require('telescope').extensions.file_browser.file_browser
+local coc = require('telescope').extensions.coc.coc
 
 vim.keymap.set('n', '<leader><leader>', builtin.find_files, {})
-vim.keymap.set('n', '<leader>ff', ':Telescope file_browser<CR>', {})
-vim.keymap.set('n', '<leader>aa', ':Telescope attempt<CR>', {})
+vim.keymap.set('n', '<leader>ff', function() file_browser({ path = '%:p:h' }) end, {})
 vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
-vim.keymap.set('n', '<leader>fr', builtin.lsp_references, {})
+vim.keymap.set('n', '<leader>fr', ':Telescope coc references<CR>', {})
 vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
 vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
 vim.keymap.set('n', '<leader>fo', builtin.oldfiles, {})
+
+local colors = require('nightfox.palette').load("duskfox")
+local TelescopeColor = {
+	TelescopeMatching = { fg = colors.yellow.base },
+
+	-- TelescopePreviewNormal = { bg = colors.bg0 },
+	-- TelescopeResultsBorder = { bg = colors.bg0, fg = colors.bg0 },
+	-- TelescopeResultsNormal = { bg = colors.bg0 },
+	-- TelescopeResultsTitle = { fg = colors.bg0 },
+	-- TelescopePromptTitle = { bg = colors.magenta.dim, fg = colors.mantle },
+	-- TelescopePromptBorder = { bg = colors.bg1, fg = colors.white.dim },
+	-- TelescopePromptNormal = { bg = colors.bg2 },
+	-- TelescopePreviewTitle = { bg = colors.green.base },
+	-- TelescopePreviewBorder = { bg = colors.bg0, fg = colors.bg0 },
+}
+
+for hl, col in pairs(TelescopeColor) do
+	vim.api.nvim_set_hl(0, hl, col)
+end

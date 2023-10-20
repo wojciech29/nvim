@@ -1,16 +1,15 @@
 local lualine = require('lualine')
+local duskfox = require('nightfox.palette').load("duskfox")
 
 local colors = {
-    red         = "#c94f6d",
-    yellow      = "#f5ce31",
-    blue        = "#719cd6",
-    magenta     = "#9d79d6",
-    cyan        = "#63cdcf",
-    white       = "#dfdfe0",
-    bg          = '#1a182c',
-    fg          = '#bbc2cf',
-    violet      = '#555180',
-    grey        = '#a19dcd',
+    red         = duskfox.red.base,
+    yellow      = duskfox.yellow.base,
+    blue        = duskfox.blue.base,
+    magenta     = duskfox.magenta.base,
+    cyan        = duskfox.cyan.dim,
+    white       = duskfox.white.base,
+    bg          = duskfox.bg0,
+    bg2         = duskfox.bg4,
 }
 
 -- Config
@@ -19,8 +18,8 @@ local config = {
     component_separators = '',
     section_separators = '',
     theme = {
-      normal    = { c = { fg = colors.fg, bg = colors.bg } },
-      inactive  = { c = { fg = colors.fg, bg = colors.bg } },
+      normal    = { c = { fg = colors.white, bg = colors.bg } },
+      inactive  = { c = { fg = colors.white, bg = colors.bg } },
     },
   },
   sections = {
@@ -102,7 +101,7 @@ ins_left {
     'branch',
     icon = '',
     color = {
-        fg = colors.grey,
+        fg = colors.bg2,
     },
 }
 
@@ -110,7 +109,7 @@ ins_left {
 ins_left {
     function() return " " end,
     color = {
-        bg = colors.violet,
+        bg = colors.bg2,
         fg = colors.bg
     },
     padding = 0,
@@ -118,7 +117,7 @@ ins_left {
 ins_left {
     'filename',
     color = {
-        bg = colors.violet,
+        bg = colors.bg2,
         fg = colors.white
     },
     padding = 0,
@@ -126,7 +125,7 @@ ins_left {
 ins_left {
     function() return " " end,
     color = {
-        bg = colors.violet,
+        bg = colors.bg2,
         fg = colors.bg
     },
     padding = 0
@@ -135,32 +134,10 @@ ins_left {
 ----------------
 -- RIGHT SECTION
 ----------------
--- ACTIVE LSP
-ins_right {
-    function()
-        local msg = 'No Active Lsp'
-        local buf_ft = vim.api.nvim_buf_get_option(0, 'filetype')
-        local clients = vim.lsp.get_active_clients()
-        if next(clients) == nil then
-            return msg
-        end
-        for _, client in ipairs(clients) do
-            local filetypes = client.config.filetypes
-            if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
-                return client.name
-            end
-        end
-        return msg
-    end,
-    color = {
-        fg = colors.violet
-    },
-}
-
 -- DIAGNOSTICS
 ins_right {
     'diagnostics',
-    sources = { 'nvim_diagnostic' },
+    sources = { 'coc' },
     symbols = {
         error = ' ',
         warn = ' ',
@@ -177,7 +154,7 @@ ins_right {
 ins_right {
     function() return '' end,
     color = function () return {
-        fg = colors.violet,
+        fg = colors.bg2,
         bg = colors.bg,
     } end,
     padding = 0,
@@ -185,7 +162,7 @@ ins_right {
 ins_right {
     'encoding',
     color = function () return {
-        bg = colors.violet,
+        bg = colors.bg2,
         fg = colors.white
     } end,
 }
@@ -195,7 +172,7 @@ ins_right {
     function() return '' end,
     color = function () return {
         fg = get_main_mode_color(),
-        bg = colors.violet,
+        bg = colors.bg2,
     } end,
     padding = 0
 }

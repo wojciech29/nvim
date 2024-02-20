@@ -28,6 +28,7 @@
 --         'kotlin_language_server',
 --         'rust_analyzer',
 --         'lua_ls',
+--         'ruff_lsp',
 --     },
 --     handlers = {
 --         lsp_zero.default_setup,

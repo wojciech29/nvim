@@ -15,7 +15,6 @@ return require('packer').startup(function(use)
     }
 
     use({ 'rose-pine/neovim', as = 'rose-pine' })
-    use { "ntk148v/habamax.nvim", requires={ "rktjmp/lush.nvim" } }
 
     use { "ellisonleao/gruvbox.nvim" }
     use "folke/tokyonight.nvim"
@@ -32,7 +31,7 @@ return require('packer').startup(function(use)
         requires = { 'nvim-tree/nvim-web-devicons', opt = true }
     }
 
-    -- use 'lukas-reineke/indent-blankline.nvim'
+    use 'lukas-reineke/indent-blankline.nvim'
 
     use 'EdenEast/nightfox.nvim'
 
@@ -46,13 +45,6 @@ return require('packer').startup(function(use)
     use 'fannheyward/telescope-coc.nvim'
 
     use {'neoclide/coc.nvim', branch = 'release'}
-
-    use({
-        "stevearc/aerial.nvim",
-        config = function()
-            require("aerial").setup()
-        end,
-    })
 
     -- use {
     --     'VonHeikemen/lsp-zero.nvim',

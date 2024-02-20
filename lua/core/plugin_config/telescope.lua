@@ -39,6 +39,7 @@ require('telescope').setup{
             '.idea',
             '.git/',
             '.ruff_cache',
+            '.mypy_cache',
             '.gradle',
             '%.java',
             '%.jpg',
@@ -91,9 +92,9 @@ require('telescope').setup{
             hijack_netrw = true,
         },
         fzf = {
-            fuzzy = true,                    -- false will only do exact matching
-            override_generic_sorter = true,  -- override the generic sorter
-            override_file_sorter = true,     -- override the file sorter
+            fuzzy = true,
+            override_generic_sorter = true,
+            override_file_sorter = true,
             case_mode = 'smart_case',        -- or 'ignore_case' or 'respect_case'
         }
     }
@@ -117,16 +118,6 @@ vim.keymap.set('n', '<leader>fo', builtin.oldfiles, {})
 local colors = require('nightfox.palette').load("duskfox")
 local TelescopeColor = {
 	TelescopeMatching = { fg = colors.yellow.base },
-
-	-- TelescopePreviewNormal = { bg = colors.bg0 },
-	-- TelescopeResultsBorder = { bg = colors.bg0, fg = colors.bg0 },
-	-- TelescopeResultsNormal = { bg = colors.bg0 },
-	-- TelescopeResultsTitle = { fg = colors.bg0 },
-	-- TelescopePromptTitle = { bg = colors.magenta.dim, fg = colors.mantle },
-	-- TelescopePromptBorder = { bg = colors.bg1, fg = colors.white.dim },
-	-- TelescopePromptNormal = { bg = colors.bg2 },
-	-- TelescopePreviewTitle = { bg = colors.green.base },
-	-- TelescopePreviewBorder = { bg = colors.bg0, fg = colors.bg0 },
 }
 
 for hl, col in pairs(TelescopeColor) do

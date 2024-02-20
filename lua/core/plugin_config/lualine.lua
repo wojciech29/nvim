@@ -116,6 +116,7 @@ ins_left {
 }
 ins_left {
     'filename',
+    path = 1,
     color = {
         bg = colors.bg2,
         fg = colors.white

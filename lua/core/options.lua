@@ -30,7 +30,3 @@ vim.opt.cursorline = true
 vim.g.mapleader = ' '
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
-
--- vim.cmd('match DiagnosticError /<<<<<<< HEAD/')
--- vim.cmd('2match DiagnosticError />>>>>>> master/')
--- vim.cmd('3match DiagnosticWarn /=======/')

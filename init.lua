@@ -2,16 +2,10 @@ require('core.options')
 require('core.keymaps')
 require('core.plugins-setup')
 
-local augroup = vim.api.nvim_create_augroup
-local DefaultGroup = augroup('DefaultGroup', {})
-local autocmd = vim.api.nvim_create_autocmd
-local TelescopeColor = {
-    TelescopeMatching = { fg = '#f6c177' },
-}
+vim.cmd.colorscheme 'tokyonight'
 
-for hl, col in pairs(TelescopeColor) do
-    vim.api.nvim_set_hl(0, hl, col)
-end
+local DefaultGroup = vim.api.nvim_create_augroup('DefaultGroup', {})
+local autocmd = vim.api.nvim_create_autocmd
 
 -- remove trailing whitespace on save
 autocmd({"BufWritePre"}, {

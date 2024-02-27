@@ -1,9 +1,16 @@
 return {
     {
         'EdenEast/nightfox.nvim',
-        config = function()
-            vim.cmd.colorscheme 'nordfox'
-        end,
+    },
+    {
+        "folke/tokyonight.nvim",
+        lazy = true,
+        priority = 1000,
+    },
+    {
+        "mcchrish/zenbones.nvim",
+        dependencies = {
+            "rktjmp/lush.nvim"
+        },
     },
 }
-

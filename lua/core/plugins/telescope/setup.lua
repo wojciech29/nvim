@@ -27,8 +27,8 @@ require('telescope').setup {
                 results_width = 0.5,
             },
             -- https://github.com/nvim-telescope/telescope.nvim/issues/2508#issuecomment-1650278179
-            width={padding=0},
-            height={padding=0},
+            width = { padding = 0 },
+            height = { padding = 0 },
             preview_cutoff = 120,
         },
         file_sorter = sorters.get_fuzzy_file,
@@ -108,3 +108,8 @@ require('telescope').setup {
         },
     }
 }
+
+pcall(require('telescope').load_extension, 'smart_history')
+pcall(require('telescope').load_extension, 'file_browser')
+pcall(require('telescope').load_extension, 'fzf')
+pcall(require('telescope').load_extension, 'live_grep_args')

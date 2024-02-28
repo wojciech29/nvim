@@ -1,7 +1,6 @@
 local builtin = require('telescope.builtin')
 local file_browser = require('telescope').extensions.file_browser.file_browser
 local live_grep_args = require('telescope').extensions.live_grep_args.live_grep_args
-local live_grep_args_shortcuts = require('telescope-live-grep-args.shortcuts')
 
 -- Default search
 vim.keymap.set(
@@ -37,7 +36,7 @@ vim.keymap.set(
 vim.keymap.set(
     'n',
     '<leader>fw',
-    live_grep_args_shortcuts.grep_word_under_cursor
+    require('telescope-live-grep-args.shortcuts').grep_word_under_cursor
 )
 
 -- Diagnostics

@@ -1,17 +1,12 @@
 -- Set <space> as the leader key
--- See `:help mapleader`
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 -- Disable netrw (default file explorer)
--- See `:help netrw`
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
--- [[ Setting options ]]
--- See `:help vim.opt`
--- For more options, you can see `:help option-list`
-
+-- [[ Setting options ]] `:help option-list`
 -- Make line numbers default
 vim.opt.number = true
 
@@ -25,8 +20,6 @@ vim.opt.mouse = "a"
 vim.opt.showmode = false
 
 -- Sync clipboard between OS and Neovim.
--- Remove this option if you want your OS clipboard to remain independent.
--- See `:help 'clipboard'`
 vim.opt.clipboard = "unnamedplus"
 
 -- Enable break indent
@@ -55,10 +48,10 @@ vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
+vim.opt.smartindent = true
+vim.opt.smartcase = true
 
 -- Sets how neovim will display certain whitespace in the editor.
---  See `:help 'list'`
---  and `:help 'listchars'`
 vim.opt.list = true
 vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
@@ -73,20 +66,17 @@ vim.opt.scrolloff = 10
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- [[ Basic Keymaps ]]
---  See `:help vim.keymap.set()`
-
-vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
+-- Search and replace of current word
+vim.keymap.set("n", "<leader>rw", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "[R]eplace [W]ord" })
 
 -- Navigation keymaps
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
-
--- search and replace of current word
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
 -- Diagnostic keymaps
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]iagnostic message" })
@@ -98,8 +88,6 @@ vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagn
 --  See `:help lua-guide-autocommands`
 
 -- Highlight when yanking (copying) text
---  Try it with `yap` in normal mode
---  See `:help vim.highlight.on_yank()`
 vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "Highlight when yanking (copying) text",
 	group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
@@ -111,7 +99,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- [[ Install `lazy.nvim` plugin manager ]]
---    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
 	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -189,8 +176,6 @@ require("lazy").setup({
 			},
 		},
 		config = function()
-			-- [[ Configure Telescope ]]
-			-- See `:help telescope` and `:help telescope.setup()`
 			local actions = require("telescope.actions")
 			local small_layout = {
 				horizontal = {
@@ -201,11 +186,7 @@ require("lazy").setup({
 			}
 
 			require("telescope").setup({
-				-- You can put your default mappings / updates / etc. in here
-				--  All the info you're looking for is in `:help telescope.setup()`
-				--
 				defaults = {
-
 					vimgrep_arguments = {
 						"rg",
 						"-L",
@@ -303,7 +284,6 @@ require("lazy").setup({
 			pcall(require("telescope").load_extension, "frecency")
 			pcall(require("telescope").load_extension, "ui-select")
 
-			-- See `:help telescope.builtin`
 			local builtin = require("telescope.builtin")
 			local file_browser = require("telescope").extensions.file_browser.file_browser
 			local live_grep_args = require("telescope").extensions.live_grep_args.live_grep_args
@@ -462,9 +442,6 @@ require("lazy").setup({
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 
-			-- Enable the following language servers
-			--  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
-			--
 			--  Add any additional override configuration in the following tables. Available keys are:
 			--  - cmd (table): Override the default command used to start the server
 			--  - filetypes (table): Override the default list of associated filetypes for the server
@@ -472,8 +449,6 @@ require("lazy").setup({
 			--  - settings (table): Override the default settings passed when initializing the server.
 			--        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
 			local servers = {
-				-- clangd = {},
-				-- gopls = {},
 				eslint = {},
 				tsserver = {},
 				pyright = {},
@@ -482,14 +457,8 @@ require("lazy").setup({
 				kotlin_language_server = {},
 				rust_analyzer = {},
 				ruff_lsp = {},
+				sqlls = {},
 				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-				--
-				-- Some languages (like typescript) have entire language plugins that can be useful:
-				--    https://github.com/pmizio/typescript-tools.nvim
-				--
-				-- But for many setups, the LSP (`tsserver`) will work just fine
-				-- tsserver = {},
-				--
 
 				lua_ls = {
 					-- cmd = {...},
@@ -519,12 +488,6 @@ require("lazy").setup({
 				},
 			}
 
-			-- Ensure the servers and tools above are installed
-			--  To check the current status of installed tools and/or manually install
-			--  other tools, you can run
-			--    :Mason
-			--
-			--  You can press `g?` for help in this menu
 			require("mason").setup()
 
 			-- You can add other tools here that you want Mason to install
@@ -561,7 +524,7 @@ require("lazy").setup({
 			formatters_by_ft = {
 				lua = { "stylua" },
 				-- Conform can also run multiple formatters sequentially
-				-- python = { "isort", "black" },
+				python = { "ruff_fix", "ruff_format" },
 				--
 				-- You can use a sub-list to tell conform to run *until* a formatter
 				-- is found.
@@ -664,11 +627,8 @@ require("lazy").setup({
 		end,
 	},
 
-	{ -- You can easily change to a different colorscheme.
-		-- Change the name of the colorscheme plugin below, and then
-		-- change the command in the config to whatever the name of that colorscheme is
-		--
-		-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`
+	-- Color scheme
+	{
 		"rebelot/kanagawa.nvim",
 		config = function()
 			require("kanagawa").setup({
@@ -687,7 +647,8 @@ require("lazy").setup({
 		end,
 	},
 
-	{ -- Collection of various small independent plugins/modules
+	-- Collection of various small independent plugins/modules
+	{
 		"echasnovski/mini.nvim",
 		config = function()
 			-- Better Around/Inside textobjects
@@ -706,7 +667,8 @@ require("lazy").setup({
 			require("mini.surround").setup()
 		end,
 	},
-	--
+
+	-- Better status line
 	{
 		"nvim-lualine/lualine.nvim",
 		config = function()
@@ -767,12 +729,12 @@ require("lazy").setup({
 		opts = { signs = false },
 	},
 
-	{ -- Highlight, edit, and navigate code
+	-- Highlight, edit, and navigate code
+	{
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
+		event = { "BufRead", "BufNewFile" },
 		config = function()
-			-- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-			---@diagnostic disable-next-line: missing-fields
 			require("nvim-treesitter.configs").setup({
 				ensure_installed = {
 					"vim",
@@ -796,11 +758,11 @@ require("lazy").setup({
 					"bash",
 					"c",
 				},
-				-- Autoinstall languages that are not installed
 				auto_install = true,
+				ignore_install = {},
 				sync_install = false,
 				highlight = { enable = true },
-				indent = { enable = false },
+				indent = { disable = { "python" } },
 				incremental_selection = {
 					enable = true,
 					keymaps = {
@@ -811,12 +773,25 @@ require("lazy").setup({
 					},
 				},
 			})
-			-- There are additional nvim-treesitter modules that you can use to interact
-			-- with nvim-treesitter. You should go explore a few and see what interests you:
-			--
-			--    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-			--    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-			--    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+		end,
+	},
+	{
+		"nvim-treesitter/nvim-treesitter-context",
+		config = function()
+			require("treesitter-context").setup({
+				enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+				max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+				min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+				line_numbers = true,
+				multiline_threshold = 20, -- Maximum number of lines to show for a single context
+				trim_scope = "outer", -- Which context lines to discard if `max_lines` is exceeded. Choices: '', 'outer'
+				mode = "cursor", -- Line used to calculate context. Choices: 'cursor', 'topline'
+				-- Separator between context and content. Should be a single character string, like '-'.
+				-- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+				separator = nil,
+				zindex = 20, -- The Z-index of the context window
+				on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
+			})
 		end,
 	},
 })

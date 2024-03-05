@@ -534,7 +534,9 @@ require("lazy").setup({
 				mapping = cmp.mapping.preset.insert({
 					["<C-n>"] = cmp.mapping.select_next_item(),
 					["<C-p>"] = cmp.mapping.select_prev_item(),
+					["<C-Space>"] = cmp.mapping.confirm({ select = true }),
 					["<C-y>"] = cmp.mapping.confirm({ select = true }),
+					["<C-r>"] = cmp.mapping.complete({}),
 				}),
 				sources = {
 					{ name = "nvim_lsp" },
@@ -593,9 +595,18 @@ require("lazy").setup({
 			require("lualine").setup({
 				options = {
 					icons_enabled = false,
+					component_separators = { left = "", right = "" },
+					section_separators = { left = "", right = "" },
 				},
 				sections = {
-					lualine_a = { "mode" },
+					lualine_a = {
+						{
+							"mode",
+							fmt = function(str)
+								return str:sub(1, 1)
+							end,
+						},
+					},
 					lualine_b = {},
 					lualine_c = {
 						{
@@ -621,7 +632,7 @@ require("lazy").setup({
 						"diagnostics",
 					},
 					lualine_y = {},
-					lualine_z = { "progress" },
+					lualine_z = {},
 				},
 				inactive_sections = {
 					lualine_a = {},
@@ -637,14 +648,6 @@ require("lazy").setup({
 				extensions = {},
 			})
 		end,
-	},
-
-	-- Highlight todo, notes, etc in comments
-	{
-		"folke/todo-comments.nvim",
-		event = "VimEnter",
-		dependencies = { "nvim-lua/plenary.nvim" },
-		opts = { signs = false },
 	},
 
 	-- Highlight, edit, and navigate code

@@ -71,9 +71,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 vim.api.nvim_create_autocmd("FileType", {
 	desc = "Set htmldjango type commentstring",
 	group = vim.api.nvim_create_augroup("CommentString", { clear = true }),
-	callback = function(ev)
-		vim.bo[ev.buf].commentstring = "{# %s #}"
-	end,
+	callback = function(ev) vim.bo[ev.buf].commentstring = "{# %s #}" end,
 	pattern = { "htmldjango" },
 })
 
@@ -81,7 +79,14 @@ vim.api.nvim_create_autocmd("FileType", {
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
 	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-	vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"--branch=stable",
+		lazyrepo,
+		lazypath,
+	})
 end
 vim.opt.rtp:prepend(lazypath)
 
@@ -125,26 +130,33 @@ require("lazy").setup({
 			},
 			{ -- If encountering errors, see telescope-fzf-native README for install instructions
 				"nvim-telescope/telescope-fzf-native.nvim",
-
-				-- `build` is used to run some command when the plugin is installed/updated.
-				-- This is only run then, not every time Neovim starts up.
 				build = "make",
-
-				-- `cond` is a condition used to determine whether this plugin should be
-				-- installed and loaded.
-				cond = function()
-					return vim.fn.executable("make") == 1
-				end,
+				cond = function() return vim.fn.executable("make") == 1 end,
 			},
 		},
 		config = function()
 			local actions = require("telescope.actions")
 			local small_layout = {
-				horizontal = {
-					prompt_position = "top",
+				winblend = 5,
+				sorting_strategy = "ascending",
+				layout_strategy = "center",
+				border = true,
+				borderchars = {
+					prompt = { "─", "│", " ", "│", "╭", "╮", "│", "│" },
+					results = { "─", "│", "─", "│", "├", "┤", "╯", "╰" },
+					preview = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
 				},
-				width = 0.55,
-				height = 0.45,
+
+				previewer = false,
+				results_title = false,
+
+				layout_config = {
+					horizontal = {
+						prompt_position = "top",
+					},
+					width = 0.55,
+					height = 0.45,
+				},
 			}
 
 			require("telescope").setup({
@@ -207,12 +219,11 @@ require("lazy").setup({
 					},
 				},
 				pickers = {
-					find_files = {
+					find_files = vim.tbl_deep_extend("error", {
 						hidden = true,
 						no_ignore = true,
-						previewer = false,
-						layout_config = small_layout,
-					},
+					}, small_layout),
+					current_buffer_fuzzy_find = small_layout,
 				},
 				extensions = {
 					["ui-select"] = {
@@ -230,15 +241,12 @@ require("lazy").setup({
 						override_file_sorter = true, -- override the file sorter
 						case_mode = "smart_case", -- or "ignore_case" or "respect_case"
 					},
-					frecency = {
-						previewer = false,
+					frecency = vim.tbl_deep_extend("error", {
 						show_filter_column = false,
-						layout_config = small_layout,
-					},
+					}, small_layout),
 				},
 			})
 
-			-- Enable telescope extensions, if they are installed
 			pcall(require("telescope").load_extension, "smart_history")
 			pcall(require("telescope").load_extension, "file_browser")
 			pcall(require("telescope").load_extension, "fzf")
@@ -249,52 +257,19 @@ require("lazy").setup({
 			local builtin = require("telescope.builtin")
 			local file_browser = require("telescope").extensions.file_browser.file_browser
 			local live_grep_args = require("telescope").extensions.live_grep_args.live_grep_args
-			vim.keymap.set(
-				"n",
-				"<leader>sf",
-				"<Cmd>Telescope frecency workspace=CWD<CR>",
-				{ desc = "[S]earch [F]iles" }
-			)
-			vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[S]earch [H]elp" })
-			vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
-			vim.keymap.set("n", "<leader><leader>", builtin.find_files, { desc = "[S]earch [F]iles" })
-			vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
-			vim.keymap.set(
-				"n",
-				"<leader>sw",
-				require("telescope-live-grep-args.shortcuts").grep_word_under_cursor,
-				{ desc = "[S]earch current [W]ord" }
-			)
-			vim.keymap.set("n", "<leader>sg", function()
-				live_grep_args()
-			end, { desc = "[S]earch by [G]rep" })
-			vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
-			vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
-			vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-			-- vim.keymap.set("n", "<leader><leader>", builtin.buffers, { desc = "[ ] Find existing buffers" })
-			vim.keymap.set("n", "<leader>sb", function()
-				file_browser({ path = "%:p:h" })
-			end, { desc = "[S]earch File [E]xplorer" })
-			-- Slightly advanced example of overriding default behavior and theme
-			vim.keymap.set("n", "<leader>/", function()
-				-- You can pass additional configuration to telescope to change theme, layout, etc.
-				builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
-					winblend = 10,
-					previewer = false,
-				}))
-			end, { desc = "[/] Fuzzily search in current buffer" })
+			local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
+			local map = function(keys, func, desc) vim.keymap.set("n", keys, func, { desc = desc }) end
 
-			-- Also possible to pass additional configuration options.
-			--  See `:help telescope.builtin.live_grep()` for information about particular keys
-			vim.keymap.set("n", "<leader>s/", function()
-				builtin.live_grep({
-					grep_open_files = true,
-					prompt_title = "Live Grep in Open Files",
-				})
-			end, { desc = "[S]earch [/] in Open Files" })
-
-			-- Shortcut for searching your neovim configuration files
-			vim.keymap.set("n", "<leader>on", "<Cmd>e $MYVIMRC<CR>", { desc = "[O]pen [N]eovim config" })
+			map("<leader>sf", "<Cmd>Telescope frecency workspace=CWD<CR>", "[S]earch by [F]recency")
+			map("<leader>sh", builtin.help_tags, "[S]earch [H]elp")
+			map("<leader>sw", live_grep_args_shortcuts.grep_word_under_cursor, "[S]earch current [W]ord")
+			map("<leader>sg", function() live_grep_args() end, "[S]earch by [G]rep")
+			map("<leader>sd", builtin.diagnostics, "[S]earch [D]iagnostics")
+			map("<leader>sr", builtin.resume, "[S]earch [R]esume")
+			map("<leader>se", function() file_browser({ path = "%:p:h" }) end, "[S]earch File [E]xplorer")
+			map("<leader><leader>", builtin.find_files, "Search Files")
+			map("<leader>/", builtin.current_buffer_fuzzy_find, "[/] Fuzzily search in current buffer")
+			map("<leader>on", "<Cmd>e $MYVIMRC<CR>", "[O]pen [N]eovim config")
 		end,
 	},
 
@@ -455,7 +430,9 @@ require("lazy").setup({
 			vim.list_extend(ensure_installed, {
 				"stylua", -- Used to format lua code
 			})
-			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
+			require("mason-tool-installer").setup({
+				ensure_installed = ensure_installed,
+			})
 
 			require("mason-lspconfig").setup({
 				handlers = {
@@ -498,9 +475,7 @@ require("lazy").setup({
 					-- Build Step is needed for regex support in snippets
 					-- This step is not supported in many windows environments
 					-- Remove the below condition to re-enable on windows
-					if vim.fn.has("win32") == 1 or vim.fn.executable("make") == 0 then
-						return
-					end
+					if vim.fn.has("win32") == 1 or vim.fn.executable("make") == 0 then return end
 					return "make install_jsregexp"
 				end)(),
 			},
@@ -526,9 +501,7 @@ require("lazy").setup({
 
 			cmp.setup({
 				snippet = {
-					expand = function(args)
-						luasnip.lsp_expand(args.body)
-					end,
+					expand = function(args) luasnip.lsp_expand(args.body) end,
 				},
 				completion = { completeopt = "menu,menuone,noinsert" },
 				mapping = cmp.mapping.preset.insert({
@@ -602,9 +575,7 @@ require("lazy").setup({
 					lualine_a = {
 						{
 							"mode",
-							fmt = function(str)
-								return str:sub(1, 1)
-							end,
+							fmt = function(str) return str:sub(1, 1) end,
 						},
 					},
 					lualine_b = {},
@@ -619,9 +590,7 @@ require("lazy").setup({
 							local bufnr = vim.api.nvim_get_current_buf()
 
 							local clients = vim.lsp.buf_get_clients(bufnr)
-							if next(clients) == nil then
-								return ""
-							end
+							if next(clients) == nil then return "" end
 
 							local c = {}
 							for _, client in pairs(clients) do

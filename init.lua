@@ -136,6 +136,8 @@ require("lazy").setup({
 		},
 		config = function()
 			local actions = require("telescope.actions")
+			local lga_actions = require("telescope-live-grep-args.actions")
+
 			local small_layout = {
 				sorting_strategy = "ascending",
 				layout_strategy = "center",
@@ -206,8 +208,8 @@ require("lazy").setup({
 					mappings = {
 						i = {
 							["<esc>"] = actions.close,
-							["<C-R>"] = actions.cycle_history_prev,
-							["<C-T>"] = actions.cycle_history_next,
+							["<C-r>"] = actions.cycle_history_prev,
+							["<C-t>"] = actions.cycle_history_next,
 						},
 					},
 					history = {
@@ -241,6 +243,15 @@ require("lazy").setup({
 					frecency = vim.tbl_deep_extend("error", {
 						show_filter_column = false,
 					}, small_layout),
+					live_grep_args = {
+						auto_quoting = true, -- enable/disable auto-quoting
+						mappings = {
+							i = {
+								["<C-k>"] = lga_actions.quote_prompt(),
+								["<C-i>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
+							},
+						},
+					},
 				},
 			})
 
@@ -263,7 +274,6 @@ require("lazy").setup({
 			map("<leader>sw", live_grep_args_shortcuts.grep_word_under_cursor, "[S]earch current [W]ord")
 			map("<leader>sg", function() live_grep_args() end, "[S]earch by [G]rep")
 			map("<leader>sd", builtin.diagnostics, "[S]earch [D]iagnostics")
-			map("<leader>sr", builtin.resume, "[S]earch [R]esume")
 			map("<leader>se", function() file_browser({ path = "%:p:h" }) end, "[S]earch File [E]xplorer")
 			map("<leader>/", builtin.current_buffer_fuzzy_find, "[/] Fuzzily search in current buffer")
 			map("<leader>on", "<Cmd>e $MYVIMRC<CR>", "[O]pen [N]eovim config")
@@ -678,6 +688,37 @@ require("lazy").setup({
 				zindex = 20, -- The Z-index of the context window
 				on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
 			})
+		end,
+	},
+	{
+		"tpope/vim-fugitive",
+		config = function()
+			vim.keymap.set("n", "<leader>gs", vim.cmd.Git)
+
+			local Fugitive = vim.api.nvim_create_augroup("Fugitive", {})
+
+			local autocmd = vim.api.nvim_create_autocmd
+			autocmd("BufWinEnter", {
+				group = Fugitive,
+				pattern = "*",
+				callback = function()
+					if vim.bo.ft ~= "fugitive" then return end
+
+					local bufnr = vim.api.nvim_get_current_buf()
+					local opts = { buffer = bufnr, remap = false }
+					vim.keymap.set("n", "<leader>p", function() vim.cmd.Git("push") end, opts)
+
+					-- rebase always
+					vim.keymap.set("n", "<leader>P", function() vim.cmd.Git({ "pull", "--rebase" }) end, opts)
+
+					-- NOTE: It allows me to easily set the branch i am pushing and any tracking
+					-- needed if i did not set the branch up correctly
+					vim.keymap.set("n", "<leader>t", ":Git push -u origin ", opts)
+				end,
+			})
+
+			vim.keymap.set("n", "gu", "<cmd>diffget //2<CR>")
+			vim.keymap.set("n", "gh", "<cmd>diffget //3<CR>")
 		end,
 	},
 })

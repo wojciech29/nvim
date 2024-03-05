@@ -78,6 +78,7 @@ vim.opt.rtp:prepend(lazypath)
 -- [[ Configure and install plugins ]]
 require("lazy").setup({
 	"tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
+	"tpope/vim-commentary",
 
 	-- "gc" to comment visual regions/lines
 	{ "numToStr/Comment.nvim", opts = {} },
@@ -647,25 +648,25 @@ require("lazy").setup({
 		config = function()
 			require("nvim-treesitter.configs").setup({
 				ensure_installed = {
-					"vim",
-					"vimdoc",
-					"lua",
-					"markdown",
-					"htmldjango",
-					"css",
-					"javascript",
-					"typescript",
-					"json",
-					"sql",
-					"yaml",
-					"xml",
-					"python",
-					"kotlin",
-					"rust",
-					"go",
-					"toml",
 					"bash",
 					"c",
+					"css",
+					"go",
+					"htmldjango",
+					"javascript",
+					"json",
+					"kotlin",
+					"lua",
+					"markdown",
+					"python",
+					"rust",
+					"sql",
+					"toml",
+					"typescript",
+					"vim",
+					"vimdoc",
+					"xml",
+					"yaml",
 				},
 				auto_install = true,
 				ignore_install = {},
@@ -676,9 +677,9 @@ require("lazy").setup({
 					enable = true,
 					keymaps = {
 						init_selection = "<CR>",
-						scope_incremental = "<CR>",
-						node_incremental = "<TAB>",
-						node_decremental = "<S-TAB>",
+						node_incremental = "<CR>",
+						scope_incremental = "<C-s>",
+						node_decremental = "<BS>",
 					},
 				},
 			})

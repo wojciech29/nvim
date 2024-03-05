@@ -31,6 +31,8 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 8
 vim.opt.incsearch = true
 vim.opt.hlsearch = true
+vim.opt.splitright = true
+vim.opt.splitbelow = true
 
 -- [[ Basic Keymaps ]]
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")

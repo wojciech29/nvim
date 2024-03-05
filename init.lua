@@ -137,18 +137,15 @@ require("lazy").setup({
 		config = function()
 			local actions = require("telescope.actions")
 			local small_layout = {
-				winblend = 5,
 				sorting_strategy = "ascending",
 				layout_strategy = "center",
-				border = true,
 				borderchars = {
 					prompt = { "─", "│", " ", "│", "╭", "╮", "│", "│" },
 					results = { "─", "│", "─", "│", "├", "┤", "╯", "╰" },
-					preview = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
 				},
-
-				previewer = false,
 				results_title = false,
+				previewer = false,
+				winblend = 5,
 
 				layout_config = {
 					horizontal = {
@@ -260,14 +257,14 @@ require("lazy").setup({
 			local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
 			local map = function(keys, func, desc) vim.keymap.set("n", keys, func, { desc = desc }) end
 
-			map("<leader>sf", "<Cmd>Telescope frecency workspace=CWD<CR>", "[S]earch by [F]recency")
+			map("<leader><leader>", "<Cmd>Telescope frecency workspace=CWD<CR>", "Search by Frecency")
+			map("<leader>sf", builtin.find_files, "[S]earch [F]iles")
 			map("<leader>sh", builtin.help_tags, "[S]earch [H]elp")
 			map("<leader>sw", live_grep_args_shortcuts.grep_word_under_cursor, "[S]earch current [W]ord")
 			map("<leader>sg", function() live_grep_args() end, "[S]earch by [G]rep")
 			map("<leader>sd", builtin.diagnostics, "[S]earch [D]iagnostics")
 			map("<leader>sr", builtin.resume, "[S]earch [R]esume")
 			map("<leader>se", function() file_browser({ path = "%:p:h" }) end, "[S]earch File [E]xplorer")
-			map("<leader><leader>", builtin.find_files, "Search Files")
 			map("<leader>/", builtin.current_buffer_fuzzy_find, "[/] Fuzzily search in current buffer")
 			map("<leader>on", "<Cmd>e $MYVIMRC<CR>", "[O]pen [N]eovim config")
 		end,

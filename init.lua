@@ -66,6 +66,14 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 		})
 	end,
 })
+vim.api.nvim_create_autocmd("FileType", {
+	desc = "Set htmldjango type commentstring",
+	group = vim.api.nvim_create_augroup("CommentString", { clear = true }),
+	callback = function(ev)
+		vim.bo[ev.buf].commentstring = "{# %s #}"
+	end,
+	pattern = { "htmldjango" },
+})
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -79,9 +87,6 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
 	"tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
 	"tpope/vim-commentary",
-
-	-- "gc" to comment visual regions/lines
-	{ "numToStr/Comment.nvim", opts = {} },
 
 	{ -- Useful plugin to show you pending keybinds.
 		"folke/which-key.nvim",
@@ -471,7 +476,7 @@ require("lazy").setup({
 			notify_on_error = false,
 			format_on_save = {
 				timeout_ms = 500,
-				lsp_fallback = true,
+				lsp_fallback = false,
 			},
 			formatters_by_ft = {
 				lua = { "stylua" },
@@ -678,7 +683,7 @@ require("lazy").setup({
 					keymaps = {
 						init_selection = "<CR>",
 						node_incremental = "<CR>",
-						scope_incremental = "<C-s>",
+						scope_incremental = false,
 						node_decremental = "<BS>",
 					},
 				},

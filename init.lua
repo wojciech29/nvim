@@ -242,6 +242,8 @@ require("lazy").setup({
 					},
 					frecency = vim.tbl_deep_extend("error", {
 						show_filter_column = false,
+						show_scores = true,
+						max_timestamps = 50,
 					}, small_layout),
 					live_grep_args = {
 						auto_quoting = true, -- enable/disable auto-quoting
@@ -268,7 +270,7 @@ require("lazy").setup({
 			local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
 			local map = function(keys, func, desc) vim.keymap.set("n", keys, func, { desc = desc }) end
 
-			map("<leader><leader>", "<Cmd>Telescope frecency workspace=CWD<CR>", "Search by Frecency")
+			map("<leader>f", "<Cmd>Telescope frecency workspace=CWD<CR>", "Search by [F]recency")
 			map("<leader>sf", builtin.find_files, "[S]earch [F]iles")
 			map("<leader>sh", builtin.help_tags, "[S]earch [H]elp")
 			map("<leader>sw", live_grep_args_shortcuts.grep_word_under_cursor, "[S]earch current [W]ord")
@@ -291,17 +293,9 @@ require("lazy").setup({
 			"WhoIsSethDaniel/mason-tool-installer.nvim",
 
 			-- Useful status updates for LSP.
-			-- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
 			{ "j-hui/fidget.nvim", opts = {} },
 		},
-		config = function()
-			-- If you're wondering about lsp vs treesitter, you can check out the wonderfully
-			-- and elegantly composed help section, `:help lsp-vs-treesitter`
-
-			--  This function gets run when an LSP attaches to a particular buffer.
-			--    That is to say, every time a new file is opened that is associated with
-			--    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
-			--    function will be executed to configure the current buffer
+		config = function() -- `:help lsp-vs-treesitter`
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
 				callback = function(event)
@@ -319,27 +313,6 @@ require("lazy").setup({
 					-- Find references for the word under your cursor.
 					map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
 
-					-- Jump to the implementation of the word under your cursor.
-					--  Useful when your language has ways of declaring types without an actual implementation.
-					map("gI", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
-
-					-- Jump to the type of the word under your cursor.
-					--  Useful when you're not sure what type a variable is and you want to see
-					--  the definition of its *type*, not where it was *defined*.
-					map("<leader>D", require("telescope.builtin").lsp_type_definitions, "Type [D]efinition")
-
-					-- Fuzzy find all the symbols in your current document.
-					--  Symbols are things like variables, functions, types, etc.
-					map("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
-
-					-- Fuzzy find all the symbols in your current workspace
-					--  Similar to document symbols, except searches over your whole project.
-					map(
-						"<leader>ws",
-						require("telescope.builtin").lsp_dynamic_workspace_symbols,
-						"[W]orkspace [S]ymbols"
-					)
-
 					-- Rename the variable under your cursor
 					--  Most Language Servers support renaming across files, etc.
 					map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
@@ -351,10 +324,6 @@ require("lazy").setup({
 					-- Opens a popup that displays documentation about the word under your cursor
 					--  See `:help K` for why this keymap
 					map("K", vim.lsp.buf.hover, "Hover Documentation")
-
-					-- WARN: This is not Goto Definition, this is Goto Declaration.
-					--  For example, in C this would take you to the header
-					map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
 
 					-- The following two autocommands are used to highlight references of the
 					-- word under your cursor when your cursor rests there for a little while.

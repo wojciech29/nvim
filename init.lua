@@ -33,6 +33,7 @@ vim.opt.incsearch = true
 vim.opt.hlsearch = true
 vim.opt.splitright = true
 vim.opt.splitbelow = true
+vim.opt.smoothscroll = true
 
 -- [[ Basic Keymaps ]]
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
@@ -52,8 +53,7 @@ vim.keymap.set("n", "N", "Nzzzv")
 -- Diagnostic keymaps
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]iagnostic message" })
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagnostic message" })
-vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
-vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+vim.keymap.set("n", "<leader>de", vim.diagnostic.open_float, { desc = "Show diagnostic [E]rror messages" })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -87,14 +87,13 @@ if not vim.loop.fs_stat(lazypath) then
 		lazyrepo,
 		lazypath,
 	})
-end
+end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
 -- [[ Configure and install plugins ]]
 require("lazy").setup({
 	"tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
 	"tpope/vim-commentary",
-
 	{ -- Useful plugin to show you pending keybinds.
 		"folke/which-key.nvim",
 		event = "VimEnter", -- Sets the loading event to 'VimEnter' (loads which-key before all the UI elements are loaded)
@@ -104,10 +103,11 @@ require("lazy").setup({
 			-- Document existing key chains
 			require("which-key").register({
 				["<leader>c"] = { name = "[C]ode", _ = "which_key_ignore" },
-				["<leader>d"] = { name = "[D]ocument", _ = "which_key_ignore" },
+				["<leader>d"] = { name = "[D]iagnostic", _ = "which_key_ignore" },
+				["<leader>f"] = { name = "[F]ind", _ = "which_key_ignore" },
+				["<leader>g"] = { name = "[G]it", _ = "which_key_ignore" },
+				["<leader>o"] = { name = "[O]pen", _ = "which_key_ignore" },
 				["<leader>r"] = { name = "[R]ename", _ = "which_key_ignore" },
-				["<leader>s"] = { name = "[S]earch", _ = "which_key_ignore" },
-				["<leader>w"] = { name = "[W]orkspace", _ = "which_key_ignore" },
 			})
 		end,
 	},
@@ -223,6 +223,9 @@ require("lazy").setup({
 						no_ignore = true,
 					}, small_layout),
 					current_buffer_fuzzy_find = small_layout,
+					diagnostics = vim.tbl_deep_extend("error", {
+						bufnr = 0,
+					}, small_layout),
 				},
 				extensions = {
 					["ui-select"] = {
@@ -270,14 +273,13 @@ require("lazy").setup({
 			local live_grep_args_shortcuts = require("telescope-live-grep-args.shortcuts")
 			local map = function(keys, func, desc) vim.keymap.set("n", keys, func, { desc = desc }) end
 
-			map("<leader>f", "<Cmd>Telescope frecency workspace=CWD<CR>", "Search by [F]recency")
-			map("<leader>sf", builtin.find_files, "[S]earch [F]iles")
-			map("<leader>sh", builtin.help_tags, "[S]earch [H]elp")
-			map("<leader>sw", live_grep_args_shortcuts.grep_word_under_cursor, "[S]earch current [W]ord")
-			map("<leader>sg", function() live_grep_args() end, "[S]earch by [G]rep")
-			map("<leader>sd", builtin.diagnostics, "[S]earch [D]iagnostics")
-			map("<leader>se", function() file_browser({ path = "%:p:h" }) end, "[S]earch File [E]xplorer")
-			map("<leader>/", builtin.current_buffer_fuzzy_find, "[/] Fuzzily search in current buffer")
+			map("<leader>ff", "<Cmd>Telescope frecency workspace=CWD<CR>", "[F]ind using [F]recency")
+			map("<leader>fh", builtin.help_tags, "[F]ind [H]elp")
+			map("<leader>fw", live_grep_args_shortcuts.grep_word_under_cursor, "[F]ind current [W]ord")
+			map("<leader>fg", function() live_grep_args() end, "[F]ind using [G]rep")
+			map("<leader>dd", builtin.diagnostics, "[D]iagnostics [D]isplay")
+			map("<leader>fe", function() file_browser({ path = "%:p:h" }) end, "[F]ile [E]xplorer")
+			map("<leader>f/", builtin.current_buffer_fuzzy_find, "[F]uzzily [/] search in current buffer")
 			map("<leader>on", "<Cmd>e $MYVIMRC<CR>", "[O]pen [N]eovim config")
 		end,
 	},
@@ -311,7 +313,7 @@ require("lazy").setup({
 					map("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
 
 					-- Find references for the word under your cursor.
-					map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
+					map("<leader>fr", require("telescope.builtin").lsp_references, "[F]ind [R]eferences")
 
 					-- Rename the variable under your cursor
 					--  Most Language Servers support renaming across files, etc.
@@ -515,6 +517,14 @@ require("lazy").setup({
 			vim.cmd.colorscheme("kanagawa")
 		end,
 	},
+	{
+		"EdenEast/nightfox.nvim",
+		-- config = function()
+		-- 	require("nightfox").load()
+		-- 	vim.cmd.colorscheme("duskfox")
+		-- end,
+	},
+	{ "folke/tokyonight.nvim" },
 
 	-- Collection of various small independent plugins/modules
 	{
@@ -551,7 +561,6 @@ require("lazy").setup({
 					lualine_a = {
 						{
 							"mode",
-							fmt = function(str) return str:sub(1, 1) end,
 						},
 					},
 					lualine_b = {},
@@ -565,7 +574,7 @@ require("lazy").setup({
 						function()
 							local bufnr = vim.api.nvim_get_current_buf()
 
-							local clients = vim.lsp.buf_get_clients(bufnr)
+							local clients = vim.lsp.get_clients({ bufnr = bufnr })
 							if next(clients) == nil then return "" end
 
 							local c = {}
@@ -576,7 +585,7 @@ require("lazy").setup({
 						end,
 						"diagnostics",
 					},
-					lualine_y = {},
+					lualine_y = { "branch" },
 					lualine_z = {},
 				},
 				inactive_sections = {
@@ -661,33 +670,6 @@ require("lazy").setup({
 	},
 	{
 		"tpope/vim-fugitive",
-		config = function()
-			vim.keymap.set("n", "<leader>gs", vim.cmd.Git)
-
-			local Fugitive = vim.api.nvim_create_augroup("Fugitive", {})
-
-			local autocmd = vim.api.nvim_create_autocmd
-			autocmd("BufWinEnter", {
-				group = Fugitive,
-				pattern = "*",
-				callback = function()
-					if vim.bo.ft ~= "fugitive" then return end
-
-					local bufnr = vim.api.nvim_get_current_buf()
-					local opts = { buffer = bufnr, remap = false }
-					vim.keymap.set("n", "<leader>p", function() vim.cmd.Git("push") end, opts)
-
-					-- rebase always
-					vim.keymap.set("n", "<leader>P", function() vim.cmd.Git({ "pull", "--rebase" }) end, opts)
-
-					-- NOTE: It allows me to easily set the branch i am pushing and any tracking
-					-- needed if i did not set the branch up correctly
-					vim.keymap.set("n", "<leader>t", ":Git push -u origin ", opts)
-				end,
-			})
-
-			vim.keymap.set("n", "gu", "<cmd>diffget //2<CR>")
-			vim.keymap.set("n", "gh", "<cmd>diffget //3<CR>")
-		end,
+		config = function() vim.keymap.set("n", "<leader>gd", "<cmd>tab Git diff<CR>", { desc = "[G]it [D]iff" }) end,
 	},
 })

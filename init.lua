@@ -33,7 +33,6 @@ vim.opt.incsearch = true
 vim.opt.hlsearch = true
 vim.opt.splitright = true
 vim.opt.splitbelow = true
-vim.opt.smoothscroll = true
 
 -- [[ Basic Keymaps ]]
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
@@ -121,18 +120,6 @@ require("lazy").setup({
 			"nvim-telescope/telescope-frecency.nvim",
 			"nvim-telescope/telescope-live-grep-args.nvim",
 			"nvim-telescope/telescope-file-browser.nvim",
-			"nvim-telescope/telescope-ui-select.nvim",
-			{
-				"nvim-telescope/telescope-smart-history.nvim",
-				dependencies = {
-					"kkharji/sqlite.lua",
-				},
-			},
-			{ -- If encountering errors, see telescope-fzf-native README for install instructions
-				"nvim-telescope/telescope-fzf-native.nvim",
-				build = "make",
-				cond = function() return vim.fn.executable("make") == 1 end,
-			},
 		},
 		config = function()
 			local actions = require("telescope.actions")
@@ -145,7 +132,9 @@ require("lazy").setup({
 					prompt = { "─", "│", " ", "│", "╭", "╮", "│", "│" },
 					results = { "─", "│", "─", "│", "├", "┤", "╯", "╰" },
 				},
+				prompt_title = false,
 				results_title = false,
+				preview_title = false,
 				previewer = false,
 				winblend = 5,
 
@@ -171,20 +160,24 @@ require("lazy").setup({
 						"--smart-case",
 					},
 					sorting_strategy = "ascending",
+					prompt_title = false,
+					results_title = false,
+					preview_title = false,
 					layout_config = {
 						horizontal = {
 							prompt_position = "top",
 							preview_width = 0.5,
 							results_width = 0.5,
+							-- https://github.com/nvim-telescope/telescope.nvim/issues/2508#issuecomment-1650278179
+							width = { padding = 0 },
+							height = { padding = 0 },
+							preview_cutoff = 120,
 						},
-						-- https://github.com/nvim-telescope/telescope.nvim/issues/2508#issuecomment-1650278179
-						width = { padding = 0 },
-						height = { padding = 0 },
-						preview_cutoff = 120,
 					},
 					file_ignore_patterns = {
 						"node_modules",
 						"__pycache__",
+						".env/",
 						"^backend/build/",
 						"^backend/sphinxsearch/",
 						".idea",
@@ -212,40 +205,51 @@ require("lazy").setup({
 							["<C-t>"] = actions.cycle_history_next,
 						},
 					},
-					history = {
-						path = "~/.local/share/nvim/databases/telescope_history.sqlite3",
-						limit = 100,
-					},
 				},
 				pickers = {
+					diagnostics = {
+						sorting_strategy = "ascending",
+						layout_strategy = "vertical",
+						preview_cutoff = 20,
+						layout_config = {
+							vertical = {
+								width = {
+									padding = 0.0,
+								},
+								height = {
+									padding = 0.0,
+								},
+								prompt_position = "top",
+								mirror = true,
+							},
+						},
+						line_width = 100,
+						prompt_title = false,
+						results_title = false,
+						preview_title = false,
+					},
 					find_files = vim.tbl_deep_extend("error", {
 						hidden = true,
 						no_ignore = true,
 					}, small_layout),
 					current_buffer_fuzzy_find = small_layout,
-					diagnostics = vim.tbl_deep_extend("error", {
-						bufnr = 0,
-					}, small_layout),
+					lsp_references = {
+						show_line = false,
+					},
 				},
 				extensions = {
-					["ui-select"] = {
-						require("telescope.themes").get_dropdown(),
-					},
 					file_browser = {
 						collapse_dirs = true,
 						grouped = true,
 						respect_gitignore = false,
 						hijack_netrw = true, -- disables netrw and use telescope-file-browser in its place
-					},
-					fzf = {
-						fuzzy = true, -- false will only do exact matching
-						override_generic_sorter = true, -- override the generic sorter
-						override_file_sorter = true, -- override the file sorter
-						case_mode = "smart_case", -- or "ignore_case" or "respect_case"
+						prompt_title = false,
+						results_title = false,
+						preview_title = false,
 					},
 					frecency = vim.tbl_deep_extend("error", {
 						show_filter_column = false,
-						show_scores = true,
+						show_scores = false,
 						max_timestamps = 50,
 					}, small_layout),
 					live_grep_args = {
@@ -260,12 +264,9 @@ require("lazy").setup({
 				},
 			})
 
-			pcall(require("telescope").load_extension, "smart_history")
 			pcall(require("telescope").load_extension, "file_browser")
-			pcall(require("telescope").load_extension, "fzf")
 			pcall(require("telescope").load_extension, "live_grep_args")
 			pcall(require("telescope").load_extension, "frecency")
-			pcall(require("telescope").load_extension, "ui-select")
 
 			local builtin = require("telescope.builtin")
 			local file_browser = require("telescope").extensions.file_browser.file_browser
@@ -368,7 +369,6 @@ require("lazy").setup({
 				cssls = {},
 				kotlin_language_server = {},
 				rust_analyzer = {},
-				ruff_lsp = {},
 				sqlls = {},
 				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
 
@@ -438,6 +438,7 @@ require("lazy").setup({
 			formatters_by_ft = {
 				lua = { "stylua" },
 				python = { "ruff_fix", "ruff_format" },
+				rust = { "rustfmt" },
 			},
 		},
 	},
@@ -517,14 +518,6 @@ require("lazy").setup({
 			vim.cmd.colorscheme("kanagawa")
 		end,
 	},
-	{
-		"EdenEast/nightfox.nvim",
-		-- config = function()
-		-- 	require("nightfox").load()
-		-- 	vim.cmd.colorscheme("duskfox")
-		-- end,
-	},
-	{ "folke/tokyonight.nvim" },
 
 	-- Collection of various small independent plugins/modules
 	{
@@ -553,7 +546,7 @@ require("lazy").setup({
 		config = function()
 			require("lualine").setup({
 				options = {
-					icons_enabled = false,
+					icons_enabled = true,
 					component_separators = { left = "", right = "" },
 					section_separators = { left = "", right = "" },
 				},
@@ -574,7 +567,7 @@ require("lazy").setup({
 						function()
 							local bufnr = vim.api.nvim_get_current_buf()
 
-							local clients = vim.lsp.get_clients({ bufnr = bufnr })
+							local clients = vim.lsp.get_active_clients({ bufnr = bufnr })
 							if next(clients) == nil then return "" end
 
 							local c = {}
